@@ -1,287 +1,196 @@
-# Method Service Health Check Dashboard
+# Method Health Check Dashboard
 
-A local development tool for monitoring Method microservices health status and performing automated troubleshooting operations.
+A comprehensive health monitoring dashboard for Method's microservices running locally. Monitor 15 services, view Git branches, perform actions like clearing Redis cache and rebuilding runtime-core, all from a single interface.
 
 ## Features
 
-- **Real-time Monitoring**: Auto-refreshes every 30 seconds to check service health
-- **Multi-Format Support**: Handles 3 different health check response formats
-- **Visual Dashboard**: Color-coded status indicators and dependency details
-- **Automated Troubleshooting**: One-click execution of common fixes
-- **Command Execution**: Supports Redis cache clearing, IIS restarts, and custom commands
+- **Real-time Health Monitoring** - Monitor 15 microservices with 5-minute auto-refresh
+- **Git Integration** - View current branch for each repo with links to GitHub and Jira tickets
+- **Quick Actions** - Clear Redis cache and rebuild runtime-core directly from the dashboard
+- **Dependency Tracking** - View service dependencies and their health status
+- **Smart Branch Linking** - Automatically extracts Jira ticket numbers (PL-#####) from branch names
+- **IIS Hosting** - Auto-starts with Windows, no manual npm start needed
 
-## Tech Stack
+## Quick Start
 
-- **Backend**: Node.js + Express
-- **Frontend**: React + Vite + Tailwind CSS
-- **State Management**: React Query (with auto-polling)
+### Production Mode (Recommended)
 
-## Prerequisites
+Just double-click `start-dashboard.bat` - that's it!
 
-- Node.js 18+ installed
-- Access to Method local services (*.methodlocal.com domains)
-- Admin privileges for IIS and service management commands
-- Redis CLI installed (for cache clearing)
+The launcher will:
+- Auto-install dependencies if needed
+- Auto-build frontend if not already built
+- Start the Node.js server in a visible terminal window
+- Automatically open http://localhost:3001 in your browser
 
-## Installation
+**Management:**
+- **Start**: Double-click `start-dashboard.bat`
+- **Stop**: Close the terminal window
+- **Rebuild after changes**: Double-click `build-dashboard.bat`, then restart
+- **Auto-start with Windows**: Create shortcut to `start-dashboard.bat` in Startup folder (`Win+R` → `shell:startup`)
 
-### 1. Clone or navigate to the project directory
-```bash
-cd C:\MethodServiceCheck
-```
+Access at: http://localhost:3001
 
-### 2. Install backend dependencies
-```bash
-cd backend
-npm install
-```
+**Why not IIS?** The dashboard controls IIS (stops/starts for runtime-core rebuild), so hosting it on IIS would cause it to kill itself.
 
-### 3. Install frontend dependencies
-```bash
-cd ../frontend
-npm install
-```
+### Development Mode (For Active Development)
 
-## Running the Dashboard
+Double-click `develop-dashboard.bat` for hot reload!
 
-### Start Backend Server
-```bash
-cd backend
-npm start
-```
-Backend will run on `http://localhost:3001`
+This starts:
+- **Backend** with auto-restart on file changes (using Node.js `--watch`)
+- **Frontend** with hot module replacement (using Vite dev server)
 
-### Start Frontend (in a separate terminal)
-```bash
-cd frontend
-npm run dev
-```
-Frontend will run on `http://localhost:5173`
+Changes appear instantly without manual rebuilds. Two terminal windows will open - close both to stop.
 
-Open your browser to `http://localhost:5173` to view the dashboard.
+Access at: http://localhost:5173 (frontend dev server)
+
+## Architecture
+
+- **Backend**: Node.js + Express serving both API and static frontend
+- **Frontend**: React + Vite + Tailwind CSS + React Query
+- **Hosting**: Batch file launcher (production) or Node.js directly (development)
 
 ## Configuration
 
-### Adding New Services
+### Monitored Services (services.json)
 
-Edit `backend/services.json`:
-```json
-{
-  "id": "my-new-service",
-  "name": "My New Service",
-  "url": "https://myservice.methodlocal.com/health/check",
-  "type": "status-results"  // or "dependencies" or "buildnumber-dependencies"
-}
+1. runtime-core (Git only, no health check)
+2. method-platform-ui (Git only, no health check)
+3. ms-gateway-api
+4. ms-authentication-api
+5. ms-authentication-api-oauth2 (→ oauth2 repo)
+6. ms-identity-api
+7. ms-preferences-api
+8. ms-account-api
+9. ms-email-api
+10. ms-apps-api
+11. ms-tables-fields-api
+12. legacy-authentication-api
+13. method-signin-ui
+14. method-signup-ui
+15. internal-migration-api
+
+### Git Repositories (git-repos.json)
+
+Maps service IDs to local git repository paths in `C:\MethodDev\`. Special mapping: `ms-authentication-api-oauth2` → `oauth2`.
+
+### Troubleshooting Actions (troubleshooting.json)
+
+Currently includes RabbitMQ restart for specific services. Redis clearing and runtime-core rebuild are global actions in the UI.
+
+## Features Detail
+
+### Health Status
+- **Healthy** (Green) - Service responding, all dependencies healthy
+- **Unhealthy** (Red) - Service or dependencies failing
+- **Error** (Yellow) - Cannot reach service or timeout
+- **No Check** (Gray border, no badge) - Git-only repos without health checks
+
+### Git Branch Display
+- Shows current branch for each repository
+- Master/main branches display in gray (non-clickable)
+- Feature branches link to Jira (extracts PL-##### pattern from branch names like `origin/PL-22414-v2`)
+- Repo names are underlined and link to GitHub with current branch
+
+### Global Actions
+- **Clear Redis Cache** - Executes `redis-cli -h localhost -p 6379 -c flushall`
+- **Rebuild Runtime-Core** - Multi-step process with streaming progress:
+  1. Stop IIS (elevated)
+  2. Clean solution
+  3. Build solution
+  4. Restart IIS (elevated)
+
+## Making Changes
+
+### During Active Development
+Use `develop-dashboard.bat` - changes appear instantly with hot reload. No manual rebuilds needed!
+
+### After Making Changes (Production Mode)
+1. **Frontend changes**: Run `build-dashboard.bat` to rebuild
+2. **Backend changes**: No rebuild needed
+3. Restart by closing terminal and running `start-dashboard.bat`
+
+Or just use development mode to avoid this hassle!
+
+## Troubleshooting
+
+### Dashboard won't start
+**Fix:** Check if port 3001 is already in use:
+```powershell
+netstat -ano | findstr :3001
 ```
+If in use, kill the process or change the port in `backend/server.js`
 
-### Adding Troubleshooting Actions
+### Cannot find module errors
+**Fix:** Run `npm install` in the backend folder, then restart.
 
-Edit `backend/troubleshooting.json`:
-```json
-{
-  "my-new-service": [
-    {
-      "id": "action-id",
-      "name": "Action Name",
-      "command": "command-to-run",
-      "args": ["arg1", "arg2"],
-      "description": "What this action does",
-      "requiresAdmin": true,  // optional
-      "shell": true  // optional, for commands with &&
-    }
-  ]
-}
-```
+### Browser doesn't open automatically
+**Fix:** Manually navigate to http://localhost:3001 - the server should still be running in the background.
 
-## Monitored Services
-
-The dashboard currently monitors 13 microservices:
-
-1. MS Gateway API
-2. MS Authentication API
-3. MS Authentication API OAuth2
-4. MS Identity API
-5. MS Preferences API
-6. MS Account API
-7. MS Email API
-8. MS Apps API
-9. MS Tables Fields API
-10. Legacy Authentication API
-11. Method SignIn UI
-12. Method SignUp UI
-13. Internal Migration API
-
-## Common Troubleshooting Commands
-
-The dashboard includes pre-configured troubleshooting actions:
-
-- **Clear Redis Cache**: `redis-cli FLUSHALL`
-- **Restart IIS**: `iisreset /restart` (requires admin)
-- **Restart RabbitMQ**: `net stop RabbitMQ && net start RabbitMQ` (requires admin)
-
-## Running with Admin Privileges
-
-Some troubleshooting actions require administrator privileges. To enable these:
-
-### Option 1: Run terminals as Administrator
-Right-click Command Prompt or PowerShell → "Run as administrator" → Navigate to project and start servers
-
-### Option 2: Configure IIS for non-admin restart (not recommended for production)
-Only for local development environments.
-
-## Health Check Response Formats
-
-The dashboard handles three different response formats:
-
-### Format 1: Status-Results
-```json
-{
-  "status": "Healthy",
-  "results": {
-    "redis": {"status": "Healthy"},
-    "mongo": {"status": "Healthy"}
-  }
-}
-```
-
-### Format 2: Dependencies Array
-```json
-{
-  "Build": "1",
-  "Release": "17.18.0.2",
-  "Dependencies": [
-    {
-      "DependencyName": "Redis",
-      "DependencyStatus": "Success"
-    }
-  ]
-}
-```
-
-### Format 3: BuildNumber-Dependencies
-```json
-{
-  "BuildNumber": "1",
-  "BuildRelease": "17.18.0.2",
-  "Dependencies": [...]
-}
-```
+### Dashboard unresponsive after IIS rebuild
+**This is expected** - the rebuild stops/starts IIS. The dashboard runs independently and remains available throughout the rebuild process.
 
 ## Project Structure
 
 ```
 MethodServiceCheck/
 ├── backend/
-│   ├── server.js              # Express API server
-│   ├── services.json          # Service configurations
-│   ├── troubleshooting.json   # Troubleshooting commands
+│   ├── server.js              # Express server + API routes
+│   ├── services.json          # Service definitions
+│   ├── git-repos.json         # Git repository mappings
+│   ├── troubleshooting.json   # Troubleshooting actions
 │   └── package.json
 ├── frontend/
 │   ├── src/
-│   │   ├── App.jsx            # Main component
+│   │   ├── App.jsx                  # Main application
 │   │   ├── components/
-│   │   │   ├── Header.jsx     # Dashboard header
-│   │   │   ├── Stats.jsx      # Statistics cards
-│   │   │   └── ServiceCard.jsx # Individual service card
-│   │   ├── main.jsx
-│   │   └── index.css
-│   ├── index.html
-│   ├── package.json
-│   └── vite.config.js
-├── claude.md                  # Context for Claude Code
-└── README.md                  # This file
+│   │   │   ├── ServiceCard.jsx      # Service status card
+│   │   │   ├── Header.jsx           # Dashboard header
+│   │   │   ├── Stats.jsx            # Statistics display
+│   │   │   ├── ActionButtons.jsx    # Global action buttons
+│   │   │   └── RebuildModal.jsx     # Runtime-core rebuild modal
+│   │   └── main.jsx
+│   ├── dist/                  # Production build
+│   └── package.json
+├── start-dashboard.bat        # Launch production (auto-builds if needed)
+├── develop-dashboard.bat      # Launch development with hot reload
+├── build-dashboard.bat        # Manual build script
+├── claude.md                  # Context for AI assistants
+└── README.md
 ```
 
 ## API Endpoints
 
-### GET /api/services
-Returns all services with their current health status
+- `GET /api/services` - All services with health status and git branch info
+- `GET /api/services/:serviceId` - Single service health
+- `POST /api/global/clear-redis` - Clear Redis cache
+- `POST /api/global/rebuild-runtime-core` - Rebuild runtime-core (streaming)
+- `GET /api/health` - Dashboard health check
+- `GET /*` - Serve frontend SPA (catch-all)
 
-### GET /api/services/:serviceId
-Returns health status for a specific service
+## Technology Stack
 
-### GET /api/troubleshooting/:serviceId
-Returns available troubleshooting actions for a service
+**Backend:**
+- Express.js - Web server and API
+- Node.js child_process - Command execution
+- Git integration - Branch detection
 
-### POST /api/troubleshoot/:serviceId/:actionId
-Executes a troubleshooting action
+**Frontend:**
+- React 18 - UI framework
+- Vite - Build tool and dev server
+- Tailwind CSS - Utility-first styling
+- React Query - Data fetching with 5-min polling
+- Lucide React - Icon components
 
-### POST /api/troubleshoot/custom
-Executes a custom command (body: `{command, args, serviceId}`)
+**Hosting:**
+- Batch file launcher - One-click start
+- Optional auto-start with Windows via startup folder
 
-### GET /api/health
-Backend server health check
+## Logs
 
-## Development
-
-### Backend Development
-```bash
-cd backend
-npm run dev  # Uses Node's --watch flag for auto-restart
-```
-
-### Frontend Development
-```bash
-cd frontend
-npm run dev  # Vite dev server with HMR
-```
-
-### Building for Production
-```bash
-cd frontend
-npm run build
-```
-
-## Troubleshooting
-
-### Services showing as "error"
-- Check if the service URLs are accessible from your machine
-- Verify DNS resolution for *.methodlocal.com domains
-- Check if services are running in your local environment
-
-### Troubleshooting commands fail
-- Ensure you're running with administrator privileges
-- Verify Redis CLI is installed and in PATH
-- Check that services like RabbitMQ are installed
-
-### Backend won't start
-- Check if port 3001 is already in use
-- Verify Node.js version (18+)
-- Check backend/services.json is valid JSON
-
-### Frontend won't start
-- Check if port 5173 is already in use
-- Delete node_modules and run `npm install` again
-- Clear Vite cache: `rm -rf node_modules/.vite`
-
-## Security Notes
-
-- This tool is designed for **local development only**
-- No authentication is implemented
-- Commands execute with the Node.js process permissions
-- Admin commands require elevated privileges
-- Do not expose this dashboard to network access
-
-## Future Enhancements
-
-- Historical health data and trends
-- Alert notifications for status changes
-- Configurable auto-remediation
-- Health check response time metrics
-- Export health reports
-- Custom command templates
-- Slack/Teams notifications
-
-## Contributing
-
-This is an internal tool for Method development. To add features:
-
-1. Update backend/server.js for API changes
-2. Update React components for UI changes
-3. Update backend/services.json for new services
-4. Update backend/troubleshooting.json for new actions
-5. Update claude.md for context changes
+Check the terminal window where the server is running for real-time logs. Error details will appear in the console output.
 
 ## License
 
-Internal use only - Method Development Team
+Internal tool for Method CRM development team.
