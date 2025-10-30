@@ -1,0 +1,85 @@
+{
+  "ms-gateway-api": [],
+  "ms-authentication-api": [],
+  "ms-authentication-api-oauth2": [],
+  "ms-identity-api": [
+    {
+      "id": "restart-rabbitmq",
+      "name": "Restart RabbitMQ",
+      "command": "net",
+      "args": ["stop", "RabbitMQ", "&&", "net", "start", "RabbitMQ"],
+      "description": "Restarts RabbitMQ service (requires admin)",
+      "requiresAdmin": true,
+      "shell": true
+    }
+  ],
+  "ms-preferences-api": [
+    {
+      "id": "restart-rabbitmq",
+      "name": "Restart RabbitMQ",
+      "command": "net",
+      "args": ["stop", "RabbitMQ", "&&", "net", "start", "RabbitMQ"],
+      "description": "Restarts RabbitMQ service (requires admin)",
+      "requiresAdmin": true,
+      "shell": true
+    }
+  ],
+  "ms-account-api": [
+    {
+      "id": "restart-rabbitmq",
+      "name": "Restart RabbitMQ",
+      "command": "net",
+      "args": ["stop", "RabbitMQ", "&&", "net", "start", "RabbitMQ"],
+      "description": "Restarts RabbitMQ service (requires admin)",
+      "requiresAdmin": true,
+      "shell": true
+    }
+  ],
+  "ms-email-api": [
+    {
+      "id": "restart-rabbitmq",
+      "name": "Restart RabbitMQ",
+      "command": "net",
+      "args": ["stop", "RabbitMQ", "&&", "net", "start", "RabbitMQ"],
+      "description": "Restarts RabbitMQ service (requires admin)",
+      "requiresAdmin": true,
+      "shell": true
+    }
+  ],
+  "ms-apps-api": [
+    {
+      "id": "restart-rabbitmq",
+      "name": "Restart RabbitMQ",
+      "command": "net",
+      "args": ["stop", "RabbitMQ", "&&", "net", "start", "RabbitMQ"],
+      "description": "Restarts RabbitMQ service (requires admin)",
+      "requiresAdmin": true,
+      "shell": true
+    }
+  ],
+  "ms-tables-fields-api": [],
+  "legacy-authentication-api": [],
+  "method-signin-ui": [
+    {
+      "id": "restart-rabbitmq",
+      "name": "Restart RabbitMQ",
+      "command": "net",
+      "args": ["stop", "RabbitMQ", "&&", "net", "start", "RabbitMQ"],
+      "description": "Restarts RabbitMQ service (requires admin)",
+      "requiresAdmin": true,
+      "shell": true
+    }
+  ],
+  "method-signup-ui": [],
+  "internal-migration-api": [
+    {
+      "id": "restart-rabbitmq",
+      "name": "Restart RabbitMQ",
+      "command": "net",
+      "args": ["stop", "RabbitMQ", "&&", "net", "start", "RabbitMQ"],
+      "description": "Restarts RabbitMQ service (requires admin)",
+      "requiresAdmin": true,
+      "shell": true
+    }
+  ]
+}

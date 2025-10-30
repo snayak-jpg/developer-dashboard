@@ -1,0 +1,92 @@
+[
+  {
+    "id": "runtime-core",
+    "name": "Runtime Core",
+    "url": null,
+    "type": "no-health-check"
+  },
+  {
+    "id": "method-platform-ui",
+    "name": "Method Platform UI",
+    "url": null,
+    "type": "no-health-check"
+  },
+  {
+    "id": "ms-gateway-api",
+    "name": "MS Gateway API",
+    "url": "https://api.methodlocal.com/v2/health/check",
+    "type": "status-results"
+  },
+  {
+    "id": "ms-authentication-api",
+    "name": "MS Authentication API",
+    "url": "https://api.methodlocal.com/v2/authentication/health/check",
+    "type": "status-results"
+  },
+  {
+    "id": "ms-authentication-api-oauth2",
+    "name": "MS Authentication API OAuth2",
+    "url": "https://auth.methodlocal.com/health/check",
+    "type": "dependencies"
+  },
+  {
+    "id": "ms-identity-api",
+    "name": "MS Identity API",
+    "url": "https://api.methodlocal.com/v2/identity/health/check",
+    "type": "status-results"
+  },
+  {
+    "id": "ms-preferences-api",
+    "name": "MS Preferences API",
+    "url": "https://api.methodlocal.com/v2/preferences/health/check",
+    "type": "status-results"
+  },
+  {
+    "id": "ms-account-api",
+    "name": "MS Account API",
+    "url": "http://microservices.methodlocal.int/account/health/check",
+    "type": "status-results"
+  },
+  {
+    "id": "ms-email-api",
+    "name": "MS Email API",
+    "url": "https://api.methodlocal.com/v2/email/health/check",
+    "type": "status-results"
+  },
+  {
+    "id": "ms-apps-api",
+    "name": "MS Apps API",
+    "url": "http://microservices.methodlocal.int/apps/health/check",
+    "type": "status-results"
+  },
+  {
+    "id": "ms-tables-fields-api",
+    "name": "MS Tables Fields API",
+    "url": "http://microservices.methodlocal.int/tables-fields/health/check",
+    "type": "dependencies"
+  },
+  {
+    "id": "legacy-authentication-api",
+    "name": "Legacy Authentication API",
+    "url": "http://services.methodlocal.com/authservice/health/check",
+    "type": "dependencies"
+  },
+  {
+    "id": "method-signin-ui",
+    "name": "Method SignIn UI",
+    "url": "https://signin.methodlocal.com/health/check",
+    "type": "buildnumber-dependencies"
+  },
+  {
+    "id": "method-signup-ui",
+    "name": "Method SignUp UI",
+    "url": "https://signup.methodlocal.com/health/check",
+    "type": "buildnumber-dependencies"
+  },
+  {
+    "id": "internal-migration-api",
+    "name": "Internal Migration API",
+    "url": "https://migration.methodlocal.com/health/check",
+    "type": "dependencies"
+  }
+]

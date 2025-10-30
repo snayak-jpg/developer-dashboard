@@ -1,0 +1,17 @@
+{
+  "ms-gateway-api": "C:\\MethodDev\\ms-gateway-api",
+  "ms-authentication-api": "C:\\MethodDev\\ms-authentication-api",
+  "ms-authentication-api-oauth2": "C:\\MethodDev\\oauth2",
+  "ms-identity-api": "C:\\MethodDev\\ms-identity-api",
+  "ms-preferences-api": "C:\\MethodDev\\ms-preferences-api",
+  "ms-account-api": "C:\\MethodDev\\ms-account-api",
+  "ms-email-api": "C:\\MethodDev\\ms-email-api",
+  "ms-apps-api": null,
+  "ms-tables-fields-api": "C:\\MethodDev\\ms-tables-fields-api",
+  "legacy-authentication-api": "C:\\MethodDev\\legacy-authentication-api",
+  "method-signin-ui": "C:\\MethodDev\\method-signin-ui",
+  "method-signup-ui": "C:\\MethodDev\\method-signup-ui",
+  "internal-migration-api": "C:\\MethodDev\\internal-migration-api",
+  "runtime-core": "C:\\MethodDev\\runtime-core",
+  "method-platform-ui": "C:\\MethodDev\\method-platform-ui"
+}

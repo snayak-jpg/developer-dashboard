@@ -1,0 +1,3 @@
+Loaded 15 services
+Method Health Check Dashboard running on http://localhost:\\.\pipe\c15a41a4-6c8d-4df4-8c4c-95099fa9bf5f
+Monitoring 15 microservices
