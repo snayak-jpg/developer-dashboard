@@ -14,7 +14,7 @@ export default function Header({ onRefresh, isRefreshing, lastUpdate }) {
           <div className="flex items-center">
             <Activity className="w-8 h-8 text-blue-500 mr-3" />
             <div>
-              <h1 className="text-2xl font-bold text-white">Developers Dashboard</h1>
+              <h1 className="text-2xl font-bold text-white">Dev Dashboard</h1>
               <p className="text-sm text-slate-400">Local Development Environment</p>
             </div>
           </div>

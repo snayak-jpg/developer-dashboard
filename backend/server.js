@@ -107,8 +107,10 @@ function parseHealthResponse(data, type) {
   return result;
 }
 
-// Check health for a single service
-async function checkServiceHealth(service) {
+// Check health for a single service with retry logic for timeouts
+async function checkServiceHealth(service, retryCount = 0) {
+  const MAX_RETRIES = 10;
+
   // Skip health check for services without URLs
   if (!service.url || service.type === 'no-health-check') {
     return {
@@ -151,10 +153,18 @@ async function checkServiceHealth(service) {
       lastChecked: new Date().toISOString()
     };
   } catch (error) {
+    const isTimeout = error.name === 'AbortError';
+
+    // Retry if it's a timeout and we haven't exceeded max retries
+    if (isTimeout && retryCount < MAX_RETRIES) {
+      console.log(`Timeout for ${service.name} (attempt ${retryCount + 1}/${MAX_RETRIES}), retrying...`);
+      return await checkServiceHealth(service, retryCount + 1);
+    }
+
     return {
       ...service,
       status: 'error',
-      error: error.name === 'AbortError' ? 'Timeout' : error.message,
+      error: isTimeout ? `Timeout (after ${retryCount + 1} attempts)` : error.message,
       lastChecked: new Date().toISOString()
     };
   }
@@ -162,12 +172,11 @@ async function checkServiceHealth(service) {
 
 // API Routes
 
-// Get all services with health status
+// Get all services with metadata only (no health checks)
 app.get('/api/services', async (req, res) => {
   try {
-    const healthChecks = await Promise.all(
+    const servicesWithMetadata = await Promise.all(
       services.map(async (service) => {
-        const health = await checkServiceHealth(service);
         const repoPath = gitRepos[service.id];
         const gitBranch = await getGitBranch(repoPath);
 
@@ -179,22 +188,24 @@ app.get('/api/services', async (req, res) => {
         }
 
         return {
-          ...health,
+          ...service,
           gitBranch,
           hasGitRepo: !!repoPath,
-          repoName
+          repoName,
+          status: null, // No health check yet
+          lastChecked: null
         };
       })
     );
 
-    res.json(healthChecks);
+    res.json(servicesWithMetadata);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get single service health
-app.get('/api/services/:serviceId', async (req, res) => {
+// Get single service health with git info
+app.get('/api/services/:serviceId/health', async (req, res) => {
   try {
     const service = services.find(s => s.id === req.params.serviceId);
 
@@ -203,7 +214,22 @@ app.get('/api/services/:serviceId', async (req, res) => {
     }
 
     const health = await checkServiceHealth(service);
-    res.json(health);
+    const repoPath = gitRepos[service.id];
+    const gitBranch = await getGitBranch(repoPath);
+
+    // Extract actual repo name from path for GitHub links
+    let repoName = service.id;
+    if (repoPath) {
+      const pathParts = repoPath.split('\\');
+      repoName = pathParts[pathParts.length - 1];
+    }
+
+    res.json({
+      ...health,
+      gitBranch,
+      hasGitRepo: !!repoPath,
+      repoName
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

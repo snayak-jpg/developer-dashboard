@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, CheckCircle2, XCircle, AlertCircle, GitBranch, ExternalLink } from 'lucide-react'
+import { ChevronDown, ChevronRight, CheckCircle2, XCircle, AlertCircle, GitBranch, ExternalLink, Activity } from 'lucide-react'
 
-export default function ServiceCard({ service }) {
+export default function ServiceCard({ service, isGitOnly = false }) {
   const [expanded, setExpanded] = useState(false)
+  const isLoading = service.loading === true
 
   // Extract PL-##### pattern from branch name for Jira links
   const extractJiraTicket = (branchName) => {
@@ -33,8 +34,12 @@ export default function ServiceCard({ service }) {
 
   const hasUnhealthyDependencies = service.dependencies?.some(dep => dep.status !== 'healthy')
 
+  const cardClassName = isGitOnly
+    ? 'bg-gradient-to-br from-slate-800 to-slate-700 rounded-lg border-2 border-blue-500/30 shadow-lg shadow-blue-500/10 transition-all'
+    : `bg-slate-800 rounded-lg border ${getStatusColor(service.status)} transition-all`
+
   return (
-    <div className={`bg-slate-800 rounded-lg border ${getStatusColor(service.status)} transition-all`}>
+    <div className={cardClassName}>
       <div className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
@@ -69,20 +74,35 @@ export default function ServiceCard({ service }) {
               </div>
             )}
           </div>
-          {service.status !== 'no-check' && (
-            <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(service.status)}`}>
-              {service.status}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {service.url && (
+              <a
+                href={service.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-400 hover:text-blue-400 transition-colors"
+                title="Open health check URL"
+              >
+                <Activity className="w-4 h-4" />
+              </a>
+            )}
+            {isLoading ? (
+              <div className="h-6 w-20 bg-slate-700 rounded animate-pulse"></div>
+            ) : service.status && service.status !== 'no-check' ? (
+              <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(service.status)}`}>
+                {service.status}
+              </span>
+            ) : null}
+          </div>
         </div>
 
-        {service.error && (
+        {service.error && !isLoading && (
           <div className="bg-red-900/20 border border-red-500/50 rounded p-2 mb-3">
             <p className="text-xs text-red-400">{service.error}</p>
           </div>
         )}
 
-        {service.dependencies && service.dependencies.length > 0 && (
+        {!isLoading && service.dependencies && service.dependencies.length > 0 && (
           <div className="mb-3">
             <button
               onClick={() => setExpanded(!expanded)}
